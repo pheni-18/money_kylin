@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:money_kylin/constants.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 
 class TradeListScreen extends StatelessWidget {
   @override
@@ -125,6 +124,19 @@ class TradeListScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: Container(
+        height: 80.0,
+        width: 80.0,
+        child: FittedBox(
+          child: FloatingActionButton(
+            backgroundColor: kPrimaryColor,
+            onPressed: () {},
+            child: Icon(Icons.add),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: _TradeListBottomAppBar(),
     );
   }
 }
@@ -222,6 +234,54 @@ class TradeCard extends StatelessWidget {
                   )),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TradeListBottomAppBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      shape: CircularNotchedRectangle(),
+      color: Color(0xFFcfd8dc),
+      child: IconTheme(
+        data: IconThemeData(color: Colors.blueGrey[700]),
+        child: Row(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.bar_chart,
+                  size: 35.0,
+                ),
+                onPressed: () {},
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.home,
+                  size: 35.0,
+                ),
+                onPressed: () {},
+              ),
+            ),
+            Spacer(),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.settings,
+                  size: 35.0,
+                ),
+                onPressed: () {},
+              ),
+            ),
+          ],
         ),
       ),
     );
