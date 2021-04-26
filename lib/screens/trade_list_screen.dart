@@ -18,7 +18,7 @@ class TradeListScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Material(
-              elevation: 12,
+              elevation: 16,
               child: Container(
                 height: size.height * 0.18,
                 width: size.width,
@@ -67,8 +67,8 @@ class TradeListScreen extends StatelessWidget {
               child: GridView.count(
                 crossAxisCount: 1,
                 mainAxisSpacing: 10,
-                padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
-                childAspectRatio: 5,
+                padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+                childAspectRatio: 4,
                 children: <Widget>[
                   DayLabel(
                     day: 1,
@@ -154,7 +154,7 @@ class DayLabel extends StatelessWidget {
       child: Text(
         '$day ($week)',
         style: TextStyle(
-          color: Colors.grey[600],
+          color: Colors.blueGrey[500],
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
         ),
@@ -174,66 +174,54 @@ class TradeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color amountColor;
-    Color borderColor;
     if (this.type == '収入') {
       amountColor = Colors.blue[500];
-      borderColor = Colors.blue[400];
     } else if (this.type == '支出') {
       amountColor = Colors.red[500];
-      borderColor = Colors.red[400];
     } else if (this.type == '貯蓄') {
       amountColor = Colors.teal[500];
-      borderColor = Colors.teal[400];
     } else {
       print('Value Error');
     }
 
-    return Card(
-      elevation: 2,
-      child: ClipPath(
-        clipper: ShapeBorderClipper(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.0),
-          ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(color: borderColor, width: 15.0),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Text(
-                this.type,
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  this.name,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(this.group,
+                Text(
+                  this.group,
                   style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 15.0,
+                    color: Colors.grey[400],
+                    fontSize: 12.0,
                     fontWeight: FontWeight.bold,
-                  )),
-              Text(this.name,
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.bold,
-                  )),
-              Text(
-                  NumberFormat.simpleCurrency(locale: 'ja').format(this.amount),
-                  style: TextStyle(
-                    color: amountColor,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  )),
-            ],
-          ),
+                  ),
+                ),
+              ],
+            ),
+            Text(NumberFormat.simpleCurrency(locale: 'ja').format(this.amount),
+                style: TextStyle(
+                  color: amountColor,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                )),
+          ],
         ),
       ),
     );
