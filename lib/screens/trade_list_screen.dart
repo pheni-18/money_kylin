@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:money_kylin/constants.dart';
 import 'package:intl/intl.dart';
+import 'package:money_kylin/screens/trade_screen.dart';
 
 class TradeListScreen extends StatelessWidget {
   @override
@@ -77,19 +78,19 @@ class TradeListScreen extends StatelessWidget {
                   TradeCard(
                     type: '収入',
                     group: '固定収入',
-                    name: '給料',
+                    category: '給料',
                     amount: 500000,
                   ),
                   TradeCard(
                     type: '支出',
                     group: '固定費',
-                    name: '家賃',
+                    category: '家賃',
                     amount: -100000,
                   ),
                   TradeCard(
                     type: '支出',
                     group: '変動費',
-                    name: '外食費',
+                    category: '外食費',
                     amount: -10000,
                   ),
                   DayLabel(
@@ -99,7 +100,7 @@ class TradeListScreen extends StatelessWidget {
                   TradeCard(
                     type: '支出',
                     group: '固定費',
-                    name: '携帯代',
+                    category: '携帯代',
                     amount: -5000,
                   ),
                   DayLabel(
@@ -109,13 +110,13 @@ class TradeListScreen extends StatelessWidget {
                   TradeCard(
                     type: '貯蓄',
                     group: '定期貯金',
-                    name: '貯金',
+                    category: '貯金',
                     amount: -100000,
                   ),
                   TradeCard(
                     type: '支出',
                     group: '変動費',
-                    name: '交通費',
+                    category: '交通費',
                     amount: -3000,
                   ),
                 ],
@@ -130,7 +131,9 @@ class TradeListScreen extends StatelessWidget {
         child: FittedBox(
           child: FloatingActionButton(
             backgroundColor: kPrimaryColor,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(_createRoute());
+            },
             child: Icon(Icons.add),
           ),
         ),
@@ -139,6 +142,24 @@ class TradeListScreen extends StatelessWidget {
       bottomNavigationBar: _TradeListBottomAppBar(),
     );
   }
+}
+
+Route _createRoute() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => TradeScreen(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }
 
 class DayLabel extends StatelessWidget {
@@ -166,10 +187,10 @@ class DayLabel extends StatelessWidget {
 class TradeCard extends StatelessWidget {
   final String type;
   final String group;
-  final String name;
+  final String category;
   final int amount;
 
-  TradeCard({this.type, this.group, this.name, this.amount});
+  TradeCard({this.type, this.group, this.category, this.amount});
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +219,7 @@ class TradeCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  this.name,
+                  this.category,
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontSize: 14.0,
@@ -215,12 +236,14 @@ class TradeCard extends StatelessWidget {
                 ),
               ],
             ),
-            Text(NumberFormat.simpleCurrency(locale: 'ja').format(this.amount),
-                style: TextStyle(
-                  color: amountColor,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                )),
+            Text(
+              NumberFormat.simpleCurrency(locale: 'ja').format(this.amount),
+              style: TextStyle(
+                color: amountColor,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
