@@ -277,6 +277,7 @@ class _TradeListBottomAppBar extends StatelessWidget {
                 icon: Icon(
                   Icons.home,
                   size: 35.0,
+                  color: kPrimaryColor,
                 ),
                 onPressed: () {},
               ),
