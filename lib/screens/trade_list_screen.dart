@@ -1,0 +1,313 @@
+import 'package:flutter/material.dart';
+import 'package:money_kylin/constants.dart';
+import 'package:intl/intl.dart';
+import 'package:money_kylin/models/trade.dart';
+import 'package:money_kylin/screens/trade_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:money_kylin/models/trade_data.dart';
+
+class TradeListScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('MONEY KYLIN'),
+        centerTitle: true,
+        backgroundColor: kPrimaryColor,
+        elevation: 0,
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Material(
+              elevation: 16,
+              child: Container(
+                height: size.height * 0.18,
+                width: size.width,
+                color: kPrimaryColor,
+                padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      children: <Widget>[
+                        Text(
+                          'April',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 60.0,
+                          ),
+                        ),
+                        SizedBox(width: 10.0),
+                        Text(
+                          '2021',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20.0),
+                    Text(
+                      '¥123,456',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 10.0),
+            Expanded(
+              child: MonthlyTradesView(year: 2021, month: 4),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: Container(
+        height: 80.0,
+        width: 80.0,
+        child: FittedBox(
+          child: FloatingActionButton(
+            backgroundColor: kPrimaryColor,
+            onPressed: () {
+              Navigator.of(context).push(_createRoute());
+            },
+            child: Icon(Icons.add),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: _TradeListBottomAppBar(),
+    );
+  }
+}
+
+class MonthlyTradesView extends StatelessWidget {
+  final int year;
+  final int month;
+
+  MonthlyTradesView({this.year, this.month});
+
+  List<Widget> createMonthlyWidgets() {
+    List<Widget> _monthlyWidgets = [];
+    DateTime _beginningDate = DateTime(this.year, this.month, 1);
+    for (int i = 0; i <= 31; i++) {
+      DateTime _date = DateTime(
+          _beginningDate.year, _beginningDate.month, _beginningDate.day + i);
+      if (_date.month != this.month) {
+        break;
+      }
+
+      _monthlyWidgets.add(DayLabel(_date));
+      _monthlyWidgets.add(DailyTradesList(_date));
+    }
+    return _monthlyWidgets;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+      child: Column(
+        children: createMonthlyWidgets(),
+      ),
+    );
+  }
+}
+
+class DailyTradesList extends StatelessWidget {
+  final DateTime _date;
+
+  DailyTradesList(this._date);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<TradeData>(
+      builder: (context, tradeData, child) {
+        List<Trade> trades = tradeData.getTradesByDate(_date);
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final trade = trades[index];
+            return TradeCard(
+              type: trade.type,
+              group: trade.group,
+              category: trade.category,
+              amount: trade.amount,
+            );
+          },
+          itemCount: trades.length,
+        );
+      },
+    );
+  }
+}
+
+Route _createRoute() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => TradeScreen(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
+}
+
+class DayLabel extends StatelessWidget {
+  final DateTime date;
+
+  const DayLabel(this.date);
+
+  @override
+  Widget build(BuildContext context) {
+    final String week = DateFormat('EEEE').format(this.date);
+    return Container(
+      margin: EdgeInsets.only(top: 30.0, bottom: 10.0),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        '${date.day} ($week)',
+        style: TextStyle(
+          color: Colors.blueGrey[500],
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class TradeCard extends StatelessWidget {
+  final String type;
+  final String group;
+  final String category;
+  final int amount;
+
+  TradeCard({this.type, this.group, this.category, this.amount});
+
+  @override
+  Widget build(BuildContext context) {
+    Color amountColor;
+    if (this.type == '収入') {
+      amountColor = Colors.blue[500];
+    } else if (this.type == '支出') {
+      amountColor = Colors.red[500];
+    } else if (this.type == '貯蓄') {
+      amountColor = Colors.teal[500];
+    } else {
+      print('Value Error');
+    }
+
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  this.category,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  this.group,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              NumberFormat.simpleCurrency(locale: 'ja').format(this.amount),
+              style: TextStyle(
+                color: amountColor,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TradeListBottomAppBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      shape: CircularNotchedRectangle(),
+      color: Color(0xFFcfd8dc),
+      child: IconTheme(
+        data: IconThemeData(color: Colors.blueGrey[700]),
+        child: Row(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.bar_chart,
+                  size: 35.0,
+                ),
+                onPressed: () {},
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.home,
+                  size: 35.0,
+                  color: kPrimaryColor,
+                ),
+                onPressed: () {},
+              ),
+            ),
+            Spacer(),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.settings,
+                  size: 35.0,
+                ),
+                onPressed: () {},
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
