@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:money_kylin/constants.dart';
 import 'package:intl/intl.dart';
+import 'package:money_kylin/models/trade.dart';
 import 'package:money_kylin/screens/trade_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:money_kylin/models/trade_data.dart';
 
 class TradeListScreen extends StatelessWidget {
   @override
@@ -65,62 +68,7 @@ class TradeListScreen extends StatelessWidget {
             ),
             SizedBox(height: 10.0),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 1,
-                mainAxisSpacing: 10,
-                padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
-                childAspectRatio: 4,
-                children: <Widget>[
-                  DayLabel(
-                    day: 1,
-                    week: 'Thu.',
-                  ),
-                  TradeCard(
-                    type: '収入',
-                    group: '固定収入',
-                    category: '給料',
-                    amount: 500000,
-                  ),
-                  TradeCard(
-                    type: '支出',
-                    group: '固定費',
-                    category: '家賃',
-                    amount: -100000,
-                  ),
-                  TradeCard(
-                    type: '支出',
-                    group: '変動費',
-                    category: '外食費',
-                    amount: -10000,
-                  ),
-                  DayLabel(
-                    day: 2,
-                    week: 'Fri.',
-                  ),
-                  TradeCard(
-                    type: '支出',
-                    group: '固定費',
-                    category: '携帯代',
-                    amount: -5000,
-                  ),
-                  DayLabel(
-                    day: 3,
-                    week: 'Sat.',
-                  ),
-                  TradeCard(
-                    type: '貯蓄',
-                    group: '定期貯金',
-                    category: '貯金',
-                    amount: -100000,
-                  ),
-                  TradeCard(
-                    type: '支出',
-                    group: '変動費',
-                    category: '交通費',
-                    amount: -3000,
-                  ),
-                ],
-              ),
+              child: MonthlyTradesView(year: 2021, month: 4),
             ),
           ],
         ),
@@ -144,6 +92,68 @@ class TradeListScreen extends StatelessWidget {
   }
 }
 
+class MonthlyTradesView extends StatelessWidget {
+  final int year;
+  final int month;
+
+  MonthlyTradesView({this.year, this.month});
+
+  List<Widget> createMonthlyWidgets() {
+    List<Widget> _monthlyWidgets = [];
+    DateTime _beginningDate = DateTime(this.year, this.month, 1);
+    for (int i = 0; i <= 31; i++) {
+      DateTime _date = DateTime(
+          _beginningDate.year, _beginningDate.month, _beginningDate.day + i);
+      if (_date.month != this.month) {
+        break;
+      }
+
+      _monthlyWidgets.add(DayLabel(_date));
+      _monthlyWidgets.add(DailyTradesList(_date));
+    }
+    return _monthlyWidgets;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+      child: Column(
+        children: createMonthlyWidgets(),
+      ),
+    );
+  }
+}
+
+class DailyTradesList extends StatelessWidget {
+  final DateTime _date;
+
+  DailyTradesList(this._date);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<TradeData>(
+      builder: (context, tradeData, child) {
+        List<Trade> trades = tradeData.getTradesByDate(_date);
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final trade = trades[index];
+            return TradeCard(
+              type: trade.type,
+              group: trade.group,
+              category: trade.category,
+              amount: trade.amount,
+            );
+          },
+          itemCount: trades.length,
+        );
+      },
+    );
+  }
+}
+
 Route _createRoute() {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) => TradeScreen(),
@@ -163,17 +173,18 @@ Route _createRoute() {
 }
 
 class DayLabel extends StatelessWidget {
-  final int day;
-  final String week;
+  final DateTime date;
 
-  const DayLabel({this.day, this.week});
+  const DayLabel(this.date);
 
   @override
   Widget build(BuildContext context) {
+    final String week = DateFormat('EEEE').format(this.date);
     return Container(
+      margin: EdgeInsets.only(top: 30.0, bottom: 10.0),
       alignment: Alignment.centerLeft,
       child: Text(
-        '$day ($week)',
+        '${date.day} ($week)',
         style: TextStyle(
           color: Colors.blueGrey[500],
           fontSize: 20.0,
@@ -205,13 +216,14 @@ class TradeCard extends StatelessWidget {
       print('Value Error');
     }
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 20.0),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
