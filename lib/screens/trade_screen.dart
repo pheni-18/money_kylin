@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:money_kylin/constants.dart';
 
 class TradeScreen extends StatelessWidget {
@@ -16,6 +17,9 @@ class TradeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            ItemNameText('Date'),
+            TradeDatePicker(),
+            SizedBox(height: 20.0),
             ItemNameText('Type'),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -96,6 +100,68 @@ class TradeScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class TradeDatePicker extends StatefulWidget {
+  @override
+  _TradeDatePickerState createState() => _TradeDatePickerState();
+}
+
+class _TradeDatePickerState extends State<TradeDatePicker> {
+  DateTime _selectedDate = DateTime.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime selected = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2019),
+      lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(primary: kPrimaryColor),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child,
+        );
+      },
+    );
+    if (selected != null) {
+      setState(() {
+        _selectedDate = selected;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: kPrimaryColor,
+            width: 2.0,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            DateFormat.yMMMMd().format(_selectedDate),
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.date_range, color: Colors.grey[700]),
+            onPressed: () => _selectDate(context),
+          )
+        ],
       ),
     );
   }
