@@ -101,11 +101,11 @@ class MonthlyTradesView extends StatelessWidget {
   List<Widget> createMonthlyWidgets() {
     List<Widget> _monthlyWidgets = [];
     DateTime _beginningDate = DateTime(this.year, this.month, 1);
-    for (int i = 0; i <= 31; i++) {
+    for (int i = 30; i >= 0; i--) {
       DateTime _date = DateTime(
           _beginningDate.year, _beginningDate.month, _beginningDate.day + i);
       if (_date.month != this.month) {
-        break;
+        continue;
       }
 
       _monthlyWidgets.add(DayLabel(_date));
