@@ -70,10 +70,25 @@ class TradeData extends ChangeNotifier {
     return UnmodifiableListView(trades);
   }
 
-  void addTrade(int id, String type, String group, String category, int amount,
-      DateTime date) {
-    final trade = Trade(id, type, group, category, amount, date);
-    _trades[date].add(trade);
-    notifyListeners();
+  int monthlyAmount(int year, int month) {
+    int total = 0;
+    for (DateTime k in _trades.keys) {
+      if (k.year != year || k.month != month) {
+        continue;
+      }
+
+      List<Trade> dailyTrades = _trades[k];
+      for (Trade trade in dailyTrades) {
+        total += trade.amount;
+      }
+    }
+    return total;
   }
+
+  // void addTrade(int id, String type, String group, String category, int amount,
+  //     DateTime date) {
+  //   final trade = Trade(id, type, group, category, amount, date);
+  //   _trades[date].add(trade);
+  //   notifyListeners();
+  // }
 }
