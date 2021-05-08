@@ -9,7 +9,9 @@ import 'package:money_kylin/models/trade_data.dart';
 class TradeListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    DateTime now = DateTime.now();
+    int year = now.year;
+    int month = now.month;
 
     return Scaffold(
       appBar: AppBar(
@@ -21,54 +23,10 @@ class TradeListScreen extends StatelessWidget {
       body: Container(
         child: Column(
           children: <Widget>[
-            Material(
-              elevation: 16,
-              child: Container(
-                height: size.height * 0.18,
-                width: size.width,
-                color: kPrimaryColor,
-                padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      children: <Widget>[
-                        Text(
-                          'April',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 60.0,
-                          ),
-                        ),
-                        SizedBox(width: 10.0),
-                        Text(
-                          '2021',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20.0),
-                    Text(
-                      '¥123,456',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            MonthlyHeader(year: year, month: month),
             SizedBox(height: 10.0),
             Expanded(
-              child: MonthlyTradesView(year: 2021, month: 4),
+              child: MonthlyTradesView(year: year, month: month),
             ),
           ],
         ),
@@ -88,6 +46,72 @@ class TradeListScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _TradeListBottomAppBar(),
+    );
+  }
+}
+
+class MonthlyHeader extends StatelessWidget {
+  final int year;
+  final int month;
+
+  const MonthlyHeader({this.year, this.month});
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    DateTime date = DateTime(this.year, this.month);
+
+    return Material(
+      elevation: 16,
+      child: Container(
+        height: size.height * 0.18,
+        width: size.width,
+        color: kPrimaryColor,
+        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              children: <Widget>[
+                Text(
+                  DateFormat.MMM().format(date),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 60.0,
+                  ),
+                ),
+                SizedBox(width: 10.0),
+                Text(
+                  DateFormat.y().format(date),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30.0,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20.0),
+            Consumer<TradeData>(
+              builder: (context, tradeData, child) {
+                int monthlyAmount =
+                    tradeData.monthlyAmount(this.year, this.month);
+                return Text(
+                  NumberFormat.simpleCurrency(locale: 'ja')
+                      .format(monthlyAmount),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30.0,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
