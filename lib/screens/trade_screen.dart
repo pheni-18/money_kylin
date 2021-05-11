@@ -21,26 +21,7 @@ class TradeScreen extends StatelessWidget {
             TradeDatePicker(),
             SizedBox(height: 20.0),
             ItemNameText('Type'),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                TradeTypeCard(
-                  iconData: Icons.monetization_on_outlined,
-                  typeName: '収入',
-                  isSelected: true,
-                ),
-                TradeTypeCard(
-                  iconData: Icons.payments_outlined,
-                  typeName: '支出',
-                  isSelected: false,
-                ),
-                TradeTypeCard(
-                  iconData: Icons.save_outlined,
-                  typeName: '貯蓄・投資',
-                  isSelected: false,
-                ),
-              ],
-            ),
+            TradeTypeRow(),
             SizedBox(height: 20.0),
             ItemNameText('Group'),
             ItemDropdown(
@@ -101,6 +82,60 @@ class TradeScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class TradeTypeRow extends StatefulWidget {
+  @override
+  _TradeTypeRowState createState() => _TradeTypeRowState();
+}
+
+enum TradeType {
+  Income,
+  Expense,
+  Saving,
+}
+
+class _TradeTypeRowState extends State<TradeTypeRow> {
+  TradeType selectedType = TradeType.Income;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        TradeTypeCard(
+          iconData: Icons.monetization_on_outlined,
+          typeName: '収入',
+          isSelected: selectedType == TradeType.Income,
+          onTap: () {
+            setState(() {
+              selectedType = TradeType.Income;
+            });
+          },
+        ),
+        TradeTypeCard(
+          iconData: Icons.payments_outlined,
+          typeName: '支出',
+          isSelected: selectedType == TradeType.Expense,
+          onTap: () {
+            setState(() {
+              selectedType = TradeType.Expense;
+            });
+          },
+        ),
+        TradeTypeCard(
+          iconData: Icons.save_outlined,
+          typeName: '貯蓄・投資',
+          isSelected: selectedType == TradeType.Saving,
+          onTap: () {
+            setState(() {
+              selectedType = TradeType.Saving;
+            });
+          },
+        ),
+      ],
     );
   }
 }
@@ -238,15 +273,17 @@ class TradeTypeCard extends StatelessWidget {
   final IconData iconData;
   final String typeName;
   final bool isSelected;
+  final Function onTap;
 
-  const TradeTypeCard({this.iconData, this.typeName, this.isSelected});
+  const TradeTypeCard(
+      {this.iconData, this.typeName, this.isSelected, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     Color colour = isSelected ? kPrimaryColor : Colors.grey[400];
 
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         height: 100.0,
         width: 100.0,
