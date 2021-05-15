@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:money_kylin/constants.dart';
+import 'package:provider/provider.dart';
+import 'package:money_kylin/models/trade_data.dart';
 
-class TradeScreen extends StatelessWidget {
+class TradeScreen extends StatefulWidget {
+  @override
+  _TradeScreenState createState() => _TradeScreenState();
+}
+
+class _TradeScreenState extends State<TradeScreen> {
+  String type = '収入';
+  String group = '変動費';
+  String category = '食料品費';
+  int amount = 0;
+  DateTime date =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,24 +32,53 @@ class TradeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             ItemNameText('Date'),
-            TradeDatePicker(),
+            TradeDatePicker(
+              selectedDate: date,
+              onSelected: (DateTime newDate) {
+                setState(() {
+                  date = newDate;
+                });
+              },
+            ),
             SizedBox(height: 20.0),
             ItemNameText('Type'),
-            TradeTypeRow(),
+            TradeTypeRow(
+              selectedType: type,
+              onTapIncome: () {
+                setState(() {
+                  type = '収入';
+                });
+              },
+              onTapExpense: () {
+                setState(() {
+                  type = '支出';
+                });
+              },
+              onTapSaving: () {
+                setState(() {
+                  type = '貯蓄';
+                });
+              },
+            ),
             SizedBox(height: 20.0),
             ItemNameText('Group'),
             ItemDropdown(
-              initValue: '変動費',
+              dropdownValue: group,
               choices: <String>[
                 '固定収入',
                 '固定費',
                 '変動費',
               ],
+              onChanged: (String newGroup) {
+                setState(() {
+                  group = newGroup;
+                });
+              },
             ),
             SizedBox(height: 20.0),
             ItemNameText('Category'),
             ItemDropdown(
-              initValue: '食料品費',
+              dropdownValue: category,
               choices: <String>[
                 '家賃',
                 '生活用品費',
@@ -43,35 +86,33 @@ class TradeScreen extends StatelessWidget {
                 '外食費',
                 '通信費',
               ],
+              onChanged: (String newCategory) {
+                setState(() {
+                  category = newCategory;
+                });
+              },
             ),
             SizedBox(height: 20.0),
             ItemNameText('Amount'),
-            TextField(
-              style: TextStyle(
-                color: Colors.grey[700],
-              ),
-              decoration: InputDecoration(
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 2.0,
-                    color: kPrimaryColor,
-                  ),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    width: 2.0,
-                    color: kPrimaryColor,
-                  ),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
+            AmountTextField(
+              onChanged: (String newAmount) {
+                setState(() {
+                  amount = int.parse(newAmount);
+                });
+              },
             ),
             SizedBox(height: 50.0),
             ConstrainedBox(
               constraints: BoxConstraints.tightFor(width: 150, height: 60),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (type == '支出' || type == '貯蓄') {
+                    amount *= -1;
+                  }
+                  Provider.of<TradeData>(context)
+                      .addTrade(type, group, category, amount, date);
+                  Navigator.pop(context);
+                },
                 style: ElevatedButton.styleFrom(
                   primary: kPrimaryColor,
                   elevation: 8.0,
@@ -86,19 +127,49 @@ class TradeScreen extends StatelessWidget {
   }
 }
 
-class TradeTypeRow extends StatefulWidget {
+class AmountTextField extends StatelessWidget {
+  final Function onChanged;
+
+  const AmountTextField({this.onChanged});
+
   @override
-  _TradeTypeRowState createState() => _TradeTypeRowState();
+  Widget build(BuildContext context) {
+    return TextField(
+      style: TextStyle(
+        color: Colors.grey[700],
+      ),
+      decoration: InputDecoration(
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            width: 2.0,
+            color: kPrimaryColor,
+          ),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(
+            width: 2.0,
+            color: kPrimaryColor,
+          ),
+        ),
+      ),
+      keyboardType: TextInputType.number,
+      textInputAction: TextInputAction.done,
+      onChanged: this.onChanged,
+    );
+  }
 }
 
-enum TradeType {
-  Income,
-  Expense,
-  Saving,
-}
+class TradeTypeRow extends StatelessWidget {
+  final String selectedType;
+  final Function onTapIncome;
+  final Function onTapExpense;
+  final Function onTapSaving;
 
-class _TradeTypeRowState extends State<TradeTypeRow> {
-  TradeType selectedType = TradeType.Income;
+  TradeTypeRow(
+      {this.selectedType,
+      this.onTapIncome,
+      this.onTapExpense,
+      this.onTapSaving});
 
   @override
   Widget build(BuildContext context) {
@@ -108,50 +179,36 @@ class _TradeTypeRowState extends State<TradeTypeRow> {
         TradeTypeCard(
           iconData: Icons.monetization_on_outlined,
           typeName: '収入',
-          isSelected: selectedType == TradeType.Income,
-          onTap: () {
-            setState(() {
-              selectedType = TradeType.Income;
-            });
-          },
+          isSelected: selectedType == '収入',
+          onTap: onTapIncome,
         ),
         TradeTypeCard(
           iconData: Icons.payments_outlined,
           typeName: '支出',
-          isSelected: selectedType == TradeType.Expense,
-          onTap: () {
-            setState(() {
-              selectedType = TradeType.Expense;
-            });
-          },
+          isSelected: selectedType == '支出',
+          onTap: onTapExpense,
         ),
         TradeTypeCard(
           iconData: Icons.save_outlined,
-          typeName: '貯蓄・投資',
-          isSelected: selectedType == TradeType.Saving,
-          onTap: () {
-            setState(() {
-              selectedType = TradeType.Saving;
-            });
-          },
+          typeName: '貯蓄',
+          isSelected: selectedType == '貯蓄',
+          onTap: onTapSaving,
         ),
       ],
     );
   }
 }
 
-class TradeDatePicker extends StatefulWidget {
-  @override
-  _TradeDatePickerState createState() => _TradeDatePickerState();
-}
+class TradeDatePicker extends StatelessWidget {
+  final DateTime selectedDate;
+  final Function onSelected;
 
-class _TradeDatePickerState extends State<TradeDatePicker> {
-  DateTime _selectedDate = DateTime.now();
+  TradeDatePicker({this.selectedDate, this.onSelected});
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime selected = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: selectedDate,
       firstDate: DateTime(2019),
       lastDate: DateTime.now(),
       builder: (BuildContext context, Widget child) {
@@ -165,9 +222,7 @@ class _TradeDatePickerState extends State<TradeDatePicker> {
       },
     );
     if (selected != null) {
-      setState(() {
-        _selectedDate = selected;
-      });
+      this.onSelected(selected);
     }
   }
 
@@ -186,7 +241,7 @@ class _TradeDatePickerState extends State<TradeDatePicker> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Text(
-            DateFormat.yMMMMd().format(_selectedDate),
+            DateFormat.yMMMMd().format(selectedDate),
             style: TextStyle(
               color: Colors.grey[700],
               fontSize: 16,
@@ -202,29 +257,17 @@ class _TradeDatePickerState extends State<TradeDatePicker> {
   }
 }
 
-class ItemDropdown extends StatefulWidget {
-  final String initValue;
+class ItemDropdown extends StatelessWidget {
+  final String dropdownValue;
   final List<String> choices;
+  final Function onChanged;
 
-  const ItemDropdown({this.initValue, this.choices});
-
-  @override
-  _ItemDropdownState createState() => _ItemDropdownState();
-}
-
-class _ItemDropdownState extends State<ItemDropdown> {
-  String dropdownValue;
-
-  @override
-  void initState() {
-    super.initState();
-    dropdownValue = widget.initValue;
-  }
+  const ItemDropdown({this.dropdownValue, this.choices, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
-      value: dropdownValue,
+      value: this.dropdownValue,
       isExpanded: true,
       elevation: 12,
       style: TextStyle(
@@ -234,12 +277,8 @@ class _ItemDropdownState extends State<ItemDropdown> {
         height: 2.0,
         color: kPrimaryColor,
       ),
-      onChanged: (String newValue) {
-        setState(() {
-          dropdownValue = newValue;
-        });
-      },
-      items: widget.choices.map<DropdownMenuItem<String>>((String value) {
+      onChanged: this.onChanged,
+      items: this.choices.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
