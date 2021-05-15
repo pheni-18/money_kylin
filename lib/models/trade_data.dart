@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:money_kylin/models/trade.dart';
 
 class TradeData extends ChangeNotifier {
+  int latestID = 6;
+
   Map<DateTime, List<Trade>> _trades = {
     DateTime(2021, 4, 1): [
       Trade(
@@ -85,10 +87,16 @@ class TradeData extends ChangeNotifier {
     return total;
   }
 
-  // void addTrade(int id, String type, String group, String category, int amount,
-  //     DateTime date) {
-  //   final trade = Trade(id, type, group, category, amount, date);
-  //   _trades[date].add(trade);
-  //   notifyListeners();
-  // }
+  void addTrade(
+      String type, String group, String category, int amount, DateTime date) {
+    latestID += 1;
+    final trade = Trade(latestID, type, group, category, amount, date);
+    if (_trades[date] == null) {
+      _trades[date] = [trade];
+    } else {
+      _trades[date].add(trade);
+    }
+
+    notifyListeners();
+  }
 }
