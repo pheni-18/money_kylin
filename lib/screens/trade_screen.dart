@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:money_kylin/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:money_kylin/models/trade_data.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class TradeScreen extends StatefulWidget {
   @override
@@ -112,6 +113,12 @@ class _TradeScreenState extends State<TradeScreen> {
                   Provider.of<TradeData>(context)
                       .addTrade(type, group, category, amount, date);
                   Navigator.pop(context);
+                  Fluttertoast.showToast(
+                    msg: '🚀 A new task created!',
+                    gravity: ToastGravity.CENTER,
+                    backgroundColor: Colors.blueGrey,
+                    timeInSecForIosWeb: 1,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   primary: kPrimaryColor,
