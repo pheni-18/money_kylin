@@ -118,7 +118,7 @@ class _TradeScreenState extends State<TradeScreen> {
                       .addTrade(type, group, category, amount, date);
                   Navigator.pop(context);
                   Fluttertoast.showToast(
-                    msg: '🚀 A new task created!',
+                    msg: '🚀 A new trade created!',
                     gravity: ToastGravity.CENTER,
                     backgroundColor: Colors.blueGrey,
                     timeInSecForIosWeb: 1,
