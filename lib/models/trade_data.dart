@@ -99,4 +99,46 @@ class TradeData extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void updateTrade(int id, String type, String group, String category,
+      int amount, DateTime date) {
+    Trade trade;
+    bool isDateChanged = false;
+    DateTime oldDate;
+
+    for (List<Trade> v in _trades.values) {
+      trade = v.firstWhere((x) => x.id == id, orElse: () => null);
+      if (trade != null) {
+        if (trade.type != type) {
+          trade.type = type;
+        }
+        if (trade.group != group) {
+          trade.group = group;
+        }
+        if (trade.category != category) {
+          trade.category = category;
+        }
+        if (trade.amount != amount) {
+          trade.amount = amount;
+        }
+        if (trade.date != date) {
+          oldDate = trade.date;
+          trade.date = date;
+          isDateChanged = true;
+        }
+      }
+    }
+
+    if (isDateChanged) {
+      _trades[oldDate].removeWhere((x) => x.id == id);
+
+      if (_trades[date] == null) {
+        _trades[date] = [trade];
+      } else {
+        _trades[date].add(trade);
+      }
+    }
+
+    notifyListeners();
+  }
 }

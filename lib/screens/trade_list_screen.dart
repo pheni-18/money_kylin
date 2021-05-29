@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:money_kylin/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:money_kylin/models/trade.dart';
-import 'package:money_kylin/screens/trade_screen.dart';
+import 'package:money_kylin/screens/add_trade_screen.dart';
+import 'package:money_kylin/screens/edit_trade_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:money_kylin/models/trade_data.dart';
 
@@ -38,7 +39,7 @@ class TradeListScreen extends StatelessWidget {
           child: FloatingActionButton(
             backgroundColor: kPrimaryColor,
             onPressed: () {
-              Navigator.of(context).push(_createRoute());
+              Navigator.of(context).push(_createAddRoute());
             },
             child: Icon(Icons.add),
           ),
@@ -166,12 +167,7 @@ class DailyTradesList extends StatelessWidget {
           physics: NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             final trade = trades[index];
-            return TradeCard(
-              type: trade.type,
-              group: trade.group,
-              category: trade.category,
-              amount: trade.amount,
-            );
+            return TradeCard(trade: trade);
           },
           itemCount: trades.length,
         );
@@ -180,9 +176,29 @@ class DailyTradesList extends StatelessWidget {
   }
 }
 
-Route _createRoute() {
+// TODO: commonalize create route method
+Route _createAddRoute() {
   return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => TradeScreen(),
+    pageBuilder: (context, animation, secondaryAnimation) => AddTradeScreen(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      var begin = Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
+}
+
+Route _createEditRoute(Trade trade) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        EditTradeScreen(trade: trade),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       var begin = Offset(0.0, 1.0);
       var end = Offset.zero;
@@ -222,67 +238,70 @@ class DayLabel extends StatelessWidget {
 }
 
 class TradeCard extends StatelessWidget {
-  final String type;
-  final String group;
-  final String category;
-  final int amount;
+  final Trade trade;
 
-  TradeCard({this.type, this.group, this.category, this.amount});
+  TradeCard({this.trade});
 
   @override
   Widget build(BuildContext context) {
     Color amountColor;
-    if (this.type == '収入') {
+    if (this.trade.type == '収入') {
       amountColor = Colors.blue[500];
-    } else if (this.type == '支出') {
+    } else if (this.trade.type == '支出') {
       amountColor = Colors.red[500];
-    } else if (this.type == '貯蓄') {
+    } else if (this.trade.type == '貯蓄') {
       amountColor = Colors.teal[500];
     } else {
       print('Value Error');
     }
 
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  this.category,
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(_createEditRoute(this.trade));
+      },
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    this.trade.category,
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Text(
-                  this.group,
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    this.trade.group,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Text(
-              NumberFormat.simpleCurrency(locale: 'ja').format(this.amount),
-              style: TextStyle(
-                color: amountColor,
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
+                ],
               ),
-            ),
-          ],
+              Text(
+                NumberFormat.simpleCurrency(locale: 'ja')
+                    .format(this.trade.amount),
+                style: TextStyle(
+                  color: amountColor,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

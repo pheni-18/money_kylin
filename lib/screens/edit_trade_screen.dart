@@ -4,33 +4,43 @@ import 'package:money_kylin/components/item_dropdown.dart';
 import 'package:money_kylin/components/item_name_text.dart';
 import 'package:money_kylin/components/amount_text_field.dart';
 import 'package:money_kylin/components/trade_date_picker.dart';
+import 'package:money_kylin/components/trade_app_bar.dart';
+import 'package:money_kylin/models/trade.dart';
 import 'package:money_kylin/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:money_kylin/models/trade_data.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class TradeScreen extends StatefulWidget {
+class EditTradeScreen extends StatefulWidget {
+  final Trade trade;
+
+  EditTradeScreen({this.trade});
+
   @override
-  _TradeScreenState createState() => _TradeScreenState();
+  _EditTradeScreenState createState() => _EditTradeScreenState();
 }
 
-class _TradeScreenState extends State<TradeScreen> {
-  String type = '収入';
-  String group = '変動費';
-  String category = '食料品費';
-  int amount = 0;
-  DateTime date =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+class _EditTradeScreenState extends State<EditTradeScreen> {
+  String type;
+  String group;
+  String category;
+  int amount;
+  DateTime date;
+
+  @override
+  void initState() {
+    super.initState();
+    type = this.widget.trade.type;
+    group = this.widget.trade.group;
+    category = this.widget.trade.category;
+    amount = this.widget.trade.amount.abs();
+    date = this.widget.trade.date;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Trade'),
-        centerTitle: true,
-        backgroundColor: kPrimaryColor,
-        elevation: 16,
-      ),
+      appBar: TradeAppBar(title: 'Edit Trade'),
       body: Padding(
         padding: EdgeInsets.all(30.0),
         child: Column(
@@ -100,6 +110,7 @@ class _TradeScreenState extends State<TradeScreen> {
             SizedBox(height: 20.0),
             ItemNameText('Amount'),
             AmountTextField(
+              initAmount: amount,
               onChanged: (String newAmount) {
                 setState(() {
                   amount = int.parse(newAmount);
@@ -114,11 +125,16 @@ class _TradeScreenState extends State<TradeScreen> {
                   if (type == '支出' || type == '貯蓄') {
                     amount *= -1;
                   }
-                  Provider.of<TradeData>(context)
-                      .addTrade(type, group, category, amount, date);
+                  Provider.of<TradeData>(context).updateTrade(
+                      this.widget.trade.id,
+                      type,
+                      group,
+                      category,
+                      amount,
+                      date);
                   Navigator.pop(context);
                   Fluttertoast.showToast(
-                    msg: '🚀 A new trade created!',
+                    msg: '✅ Trade edited!',
                     gravity: ToastGravity.CENTER,
                     backgroundColor: Colors.blueGrey,
                     timeInSecForIosWeb: 1,
