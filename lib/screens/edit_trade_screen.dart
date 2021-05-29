@@ -119,7 +119,7 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
             ),
             SizedBox(height: 50.0),
             ConstrainedBox(
-              constraints: BoxConstraints.tightFor(width: 150, height: 60),
+              constraints: BoxConstraints.tightFor(height: 60),
               child: ElevatedButton(
                 onPressed: () {
                   if (type == '支出' || type == '貯蓄') {
@@ -134,7 +134,7 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
                       date);
                   Navigator.pop(context);
                   Fluttertoast.showToast(
-                    msg: '✅ Trade edited!',
+                    msg: '💫 Trade edited!',
                     gravity: ToastGravity.CENTER,
                     backgroundColor: Colors.blueGrey,
                     timeInSecForIosWeb: 1,
@@ -145,6 +145,28 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
                   elevation: 8.0,
                 ),
                 child: Text('Save'),
+              ),
+            ),
+            SizedBox(height: 20.0),
+            ConstrainedBox(
+              constraints: BoxConstraints.tightFor(height: 60),
+              child: ElevatedButton(
+                onPressed: () {
+                  Provider.of<TradeData>(context)
+                      .deleteTrade(this.widget.trade.id);
+                  Navigator.pop(context);
+                  Fluttertoast.showToast(
+                    msg: '💥 Trade deleted!',
+                    gravity: ToastGravity.CENTER,
+                    backgroundColor: Colors.blueGrey,
+                    timeInSecForIosWeb: 1,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red[300],
+                  elevation: 8.0,
+                ),
+                child: Text('Delete'),
               ),
             ),
           ],
