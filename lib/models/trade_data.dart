@@ -2,11 +2,27 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:money_kylin/models/trade.dart';
+import 'package:money_kylin/repositories/trade.dart';
 
 class TradeData extends ChangeNotifier {
-  int latestID = 0;
+  final TradeRepository repository = TradeRepository();
 
   Map<DateTime, List<Trade>> _trades = {};
+
+  TradeData() {
+    Future(() async {
+      List<Trade> trades = await repository.findAll();
+      for (Trade trade in trades) {
+        if (_trades[trade.date] == null) {
+          _trades[trade.date] = [trade];
+        } else {
+          _trades[trade.date].add(trade);
+        }
+      }
+
+      notifyListeners();
+    });
+  }
 
   UnmodifiableListView<Trade> getTradesByDate(DateTime date) {
     List<Trade> trades = _trades[date];
@@ -32,10 +48,10 @@ class TradeData extends ChangeNotifier {
     return total;
   }
 
-  void addTrade(
-      String type, String group, String category, int amount, DateTime date) {
-    latestID += 1;
-    final trade = Trade(latestID, type, group, category, amount, date);
+  void addTrade(String type, String group, String category, int amount,
+      DateTime date) async {
+    int id = await repository.insert(type, group, category, amount, date);
+    final trade = Trade(id, type, group, category, amount, date);
     if (_trades[date] == null) {
       _trades[date] = [trade];
     } else {
@@ -47,6 +63,8 @@ class TradeData extends ChangeNotifier {
 
   void updateTrade(int id, String type, String group, String category,
       int amount, DateTime date) {
+    repository.update(id, type, group, category, amount, date);
+
     Trade trade;
     bool isDateChanged = false;
     DateTime oldDate;
@@ -88,6 +106,8 @@ class TradeData extends ChangeNotifier {
   }
 
   void deleteTrade(int id) {
+    repository.delete(id);
+
     for (List<Trade> v in _trades.values) {
       v.removeWhere((x) => x.id == id);
     }
