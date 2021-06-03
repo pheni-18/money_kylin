@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_kylin/constants.dart';
 
 class ItemNameText extends StatelessWidget {
   final String name;
@@ -12,7 +13,7 @@ class ItemNameText extends StatelessWidget {
       child: Text(
         this.name,
         style: TextStyle(
-          color: Colors.blueGrey[500],
+          color: kSecondaryColor,
           fontWeight: FontWeight.bold,
         ),
       ),

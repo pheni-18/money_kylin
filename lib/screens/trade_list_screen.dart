@@ -228,7 +228,7 @@ class DayLabel extends StatelessWidget {
       child: Text(
         '${date.day} ($week)',
         style: TextStyle(
-          color: Colors.blueGrey[500],
+          color: kSecondaryColor,
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
         ),
@@ -246,11 +246,11 @@ class TradeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Color amountColor;
     if (this.trade.type == '収入') {
-      amountColor = Colors.blue[500];
+      amountColor = Colors.blue;
     } else if (this.trade.type == '支出') {
-      amountColor = Colors.red[500];
+      amountColor = Colors.red;
     } else if (this.trade.type == '貯蓄') {
-      amountColor = Colors.teal[500];
+      amountColor = Colors.teal;
     } else {
       print('Value Error');
     }
@@ -276,7 +276,7 @@ class TradeCard extends StatelessWidget {
                   Text(
                     this.trade.category,
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: kTextColor,
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -284,7 +284,7 @@ class TradeCard extends StatelessWidget {
                   Text(
                     this.trade.group,
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: kLightTextColor,
                       fontSize: 12.0,
                       fontWeight: FontWeight.bold,
                     ),

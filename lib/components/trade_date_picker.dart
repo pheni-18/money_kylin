@@ -46,12 +46,12 @@ class TradeDatePicker extends StatelessWidget {
           Text(
             DateFormat.yMMMMd().format(selectedDate),
             style: TextStyle(
-              color: Colors.grey[700],
+              color: kTextColor,
               fontSize: 16,
             ),
           ),
           IconButton(
-            icon: Icon(Icons.date_range, color: Colors.grey[700]),
+            icon: Icon(Icons.date_range, color: kTextColor),
             onPressed: () => _selectDate(context),
           )
         ],

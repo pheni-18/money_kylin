@@ -26,7 +26,7 @@ class _AmountTextFieldState extends State<AmountTextField> {
     return TextField(
       controller: _textEditingController,
       style: TextStyle(
-        color: Colors.grey[700],
+        color: kTextColor,
       ),
       decoration: InputDecoration(
         enabledBorder: UnderlineInputBorder(

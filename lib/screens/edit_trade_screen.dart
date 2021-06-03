@@ -136,7 +136,7 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
                   Fluttertoast.showToast(
                     msg: '💫 Trade edited!',
                     gravity: ToastGravity.CENTER,
-                    backgroundColor: Colors.blueGrey,
+                    backgroundColor: kSecondaryColor,
                     timeInSecForIosWeb: 1,
                   );
                 },
@@ -158,7 +158,7 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
                   Fluttertoast.showToast(
                     msg: '💥 Trade deleted!',
                     gravity: ToastGravity.CENTER,
-                    backgroundColor: Colors.blueGrey,
+                    backgroundColor: kSecondaryColor,
                     timeInSecForIosWeb: 1,
                   );
                 },

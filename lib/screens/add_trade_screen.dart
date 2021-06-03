@@ -117,7 +117,7 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
                   Fluttertoast.showToast(
                     msg: '🚀 A new trade created!',
                     gravity: ToastGravity.CENTER,
-                    backgroundColor: Colors.blueGrey,
+                    backgroundColor: kSecondaryColor,
                     timeInSecForIosWeb: 1,
                   );
                 },
