@@ -27,6 +27,37 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
   int amount;
   DateTime date;
 
+  final Map<String, List<String>> groupChoices = {
+    '収入': [
+      '固定収入',
+    ],
+    '支出': ['固定費', '変動費'],
+    '貯蓄': [
+      '定期貯金',
+    ]
+  };
+
+  final Map<String, List<String>> categoryChoices = {
+    '固定収入': [
+      '給料',
+    ],
+    '固定費': [
+      '家賃',
+      '水道光熱費',
+      '通信費',
+    ],
+    '変動費': [
+      '食費',
+      '外食費',
+      '交通費',
+      '生活用品',
+      '雑費',
+    ],
+    '定期貯金': [
+      '現金貯金',
+    ],
+  };
+
   @override
   void initState() {
     super.initState();
@@ -62,16 +93,22 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
               onTapIncome: () {
                 setState(() {
                   type = '収入';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
               onTapExpense: () {
                 setState(() {
                   type = '支出';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
               onTapSaving: () {
                 setState(() {
                   type = '貯蓄';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
             ),
@@ -79,14 +116,11 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
             ItemNameText('Group'),
             ItemDropdown(
               dropdownValue: group,
-              choices: <String>[
-                '固定収入',
-                '固定費',
-                '変動費',
-              ],
+              choices: groupChoices[type],
               onChanged: (String newGroup) {
                 setState(() {
                   group = newGroup;
+                  category = categoryChoices[group][0];
                 });
               },
             ),
@@ -94,13 +128,7 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
             ItemNameText('Category'),
             ItemDropdown(
               dropdownValue: category,
-              choices: <String>[
-                '家賃',
-                '生活用品費',
-                '食料品費',
-                '外食費',
-                '通信費',
-              ],
+              choices: categoryChoices[group],
               onChanged: (String newCategory) {
                 setState(() {
                   category = newCategory;
