@@ -3,11 +3,11 @@ import 'package:money_kylin/models/trade.dart';
 import 'package:intl/intl.dart';
 
 class TradeRepository {
-  final dbHelper = DatabaseHelper.instance;
-  final dateFormat = 'y-M-d';
+  final DatabaseHelper dbHelper = DatabaseHelper.instance;
+  final String dateFormat = 'y-M-d';
 
   Trade _toTrade(Map<String, dynamic> row) {
-    DateTime date =
+    final DateTime date =
         DateFormat(dateFormat).parseStrict(row[DatabaseHelper.columnDate]);
 
     return Trade(
@@ -21,7 +21,7 @@ class TradeRepository {
   }
 
   Map<String, dynamic> _toRow(Trade trade) {
-    String formattedDate = DateFormat(dateFormat).format(trade.date);
+    final String formattedDate = DateFormat(dateFormat).format(trade.date);
 
     return {
       DatabaseHelper.columnId: trade.id,
@@ -35,7 +35,7 @@ class TradeRepository {
 
   Future<int> insert(String type, String group, String category, int amount,
       DateTime date) async {
-    String formattedDate = DateFormat(dateFormat).format(date);
+    final String formattedDate = DateFormat(dateFormat).format(date);
 
     Map<String, dynamic> row = {
       DatabaseHelper.columnType: type,
@@ -65,7 +65,7 @@ class TradeRepository {
 
   void update(int id, String type, String group, String category, int amount,
       DateTime date) async {
-    Trade oldTrade = await find(id);
+    final Trade oldTrade = await find(id);
     Map<String, dynamic> row = _toRow(oldTrade);
     if (type != oldTrade.type) {
       row[DatabaseHelper.columnType] = type;

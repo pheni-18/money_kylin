@@ -10,9 +10,9 @@ import 'package:money_kylin/models/trade_data.dart';
 class TradeListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    DateTime now = DateTime.now();
-    int year = now.year;
-    int month = now.month;
+    final DateTime now = DateTime.now();
+    final int year = now.year;
+    final int month = now.month;
 
     return Scaffold(
       appBar: AppBar(
@@ -59,8 +59,8 @@ class MonthlyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    DateTime date = DateTime(this.year, this.month);
+    final Size size = MediaQuery.of(context).size;
+    final DateTime date = DateTime(this.year, this.month);
 
     return Material(
       elevation: 16,
@@ -97,7 +97,7 @@ class MonthlyHeader extends StatelessWidget {
             SizedBox(height: 20.0),
             Consumer<TradeData>(
               builder: (context, tradeData, child) {
-                int monthlyAmount =
+                final int monthlyAmount =
                     tradeData.monthlyAmount(this.year, this.month);
                 return Text(
                   NumberFormat.simpleCurrency(locale: 'ja')
@@ -121,13 +121,13 @@ class MonthlyTradesView extends StatelessWidget {
   final int year;
   final int month;
 
-  MonthlyTradesView({this.year, this.month});
+  const MonthlyTradesView({this.year, this.month});
 
   List<Widget> createMonthlyWidgets() {
     List<Widget> _monthlyWidgets = [];
-    DateTime _beginningDate = DateTime(this.year, this.month, 1);
-    DateTime _now = DateTime.now();
-    DateTime _today = DateTime(_now.year, _now.month, _now.day);
+    final DateTime _beginningDate = DateTime(this.year, this.month, 1);
+    final DateTime _now = DateTime.now();
+    final DateTime _today = DateTime(_now.year, _now.month, _now.day);
     for (int i = 30; i >= 0; i--) {
       DateTime _date = DateTime(
           _beginningDate.year, _beginningDate.month, _beginningDate.day + i);
@@ -155,7 +155,7 @@ class MonthlyTradesView extends StatelessWidget {
 class DailyTradesList extends StatelessWidget {
   final DateTime _date;
 
-  DailyTradesList(this._date);
+  const DailyTradesList(this._date);
 
   @override
   Widget build(BuildContext context) {
@@ -181,11 +181,12 @@ Route _createAddRoute() {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) => AddTradeScreen(),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      var begin = Offset(0.0, 1.0);
-      var end = Offset.zero;
-      var curve = Curves.ease;
+      final Offset begin = Offset(0.0, 1.0);
+      final Offset end = Offset.zero;
+      final Curve curve = Curves.ease;
 
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      final Animatable<Offset> tween =
+          Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
       return SlideTransition(
         position: animation.drive(tween),
@@ -240,7 +241,7 @@ class DayLabel extends StatelessWidget {
 class TradeCard extends StatelessWidget {
   final Trade trade;
 
-  TradeCard({this.trade});
+  const TradeCard({this.trade});
 
   @override
   Widget build(BuildContext context) {

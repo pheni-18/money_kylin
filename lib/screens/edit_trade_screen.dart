@@ -14,7 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class EditTradeScreen extends StatefulWidget {
   final Trade trade;
 
-  EditTradeScreen({this.trade});
+  const EditTradeScreen({this.trade});
 
   @override
   _EditTradeScreenState createState() => _EditTradeScreenState();

@@ -25,7 +25,7 @@ class TradeData extends ChangeNotifier {
   }
 
   UnmodifiableListView<Trade> getTradesByDate(DateTime date) {
-    List<Trade> trades = _trades[date];
+    final List<Trade> trades = _trades[date];
     if (trades == null) {
       List<Trade> emptyList = [];
       return UnmodifiableListView(emptyList);
@@ -50,7 +50,7 @@ class TradeData extends ChangeNotifier {
 
   void addTrade(String type, String group, String category, int amount,
       DateTime date) async {
-    int id = await repository.insert(type, group, category, amount, date);
+    final int id = await repository.insert(type, group, category, amount, date);
     final trade = Trade(id, type, group, category, amount, date);
     if (_trades[date] == null) {
       _trades[date] = [trade];

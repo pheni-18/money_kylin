@@ -6,10 +6,10 @@ class TradeDatePicker extends StatelessWidget {
   final DateTime selectedDate;
   final Function onSelected;
 
-  TradeDatePicker({this.selectedDate, this.onSelected});
+  const TradeDatePicker({this.selectedDate, this.onSelected});
 
   Future<void> _selectDate(BuildContext context) async {
-    DateTime selected = await showDatePicker(
+    final DateTime selected = await showDatePicker(
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2019),

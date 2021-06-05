@@ -4,17 +4,17 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
-  static final _databaseName = "money_kylin.db";
-  static final _databaseVersion = 1;
+  static final String _databaseName = "money_kylin.db";
+  static final int _databaseVersion = 1;
 
-  static final table = 'trades';
+  static final String table = 'trades';
 
-  static final columnId = '_id';
-  static final columnType = 'type';
-  static final columnGroup = '_group';
-  static final columnCategory = 'category';
-  static final columnAmount = 'amount';
-  static final columnDate = 'date';
+  static final String columnId = '_id';
+  static final String columnType = 'type';
+  static final String columnGroup = '_group';
+  static final String columnCategory = 'category';
+  static final String columnAmount = 'amount';
+  static final String columnDate = 'date';
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -49,30 +49,30 @@ class DatabaseHelper {
 
   // Helper methods
   Future<int> insert(Map<String, dynamic> row) async {
-    Database db = await instance.database;
+    final Database db = await instance.database;
     return await db.insert(table, row);
   }
 
   Future<List<Map<String, dynamic>>> findAll() async {
-    Database db = await instance.database;
+    final Database db = await instance.database;
     return await db.query(table);
   }
 
   Future<Map<String, dynamic>> find(int id) async {
-    Database db = await instance.database;
+    final Database db = await instance.database;
     List<Map<String, dynamic>> rows =
         await db.query(table, where: '$columnId = ?', whereArgs: [id]);
     return rows[0];
   }
 
   Future<int> update(Map<String, dynamic> row) async {
-    Database db = await instance.database;
+    final Database db = await instance.database;
     int id = row[columnId];
     return await db.update(table, row, where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future<int> delete(int id) async {
-    Database db = await instance.database;
+    final Database db = await instance.database;
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 }
