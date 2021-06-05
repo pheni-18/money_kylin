@@ -152,18 +152,55 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
               constraints: BoxConstraints.tightFor(height: 60),
               child: ElevatedButton(
                 onPressed: () {
-                  Provider.of<TradeData>(context)
-                      .deleteTrade(this.widget.trade.id);
-                  Navigator.pop(context);
-                  Fluttertoast.showToast(
-                    msg: '💥 Trade deleted!',
-                    gravity: ToastGravity.CENTER,
-                    backgroundColor: kSecondaryColor,
-                    timeInSecForIosWeb: 1,
+                  showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text(
+                        'Delete',
+                        style: TextStyle(color: kSecondaryColor),
+                      ),
+                      content: const Text(
+                        'Are you sure you want to delete this trade?',
+                        style: TextStyle(
+                          color: kTextColor,
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: kLightTextColor,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, 'Delete');
+                            Provider.of<TradeData>(context)
+                                .deleteTrade(this.widget.trade.id);
+                            Navigator.pop(context);
+                            Fluttertoast.showToast(
+                              msg: '💥 Trade deleted!',
+                              gravity: ToastGravity.CENTER,
+                              backgroundColor: kSecondaryColor,
+                              timeInSecForIosWeb: 1,
+                            );
+                          },
+                          child: const Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: kCautionColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.red[300],
+                  primary: kCautionColor,
                   elevation: 8.0,
                 ),
                 child: Text('Delete'),
