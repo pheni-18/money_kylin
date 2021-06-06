@@ -10,10 +10,6 @@ import 'package:money_kylin/models/trade_data.dart';
 class TradeListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final DateTime now = DateTime.now();
-    final int year = now.year;
-    final int month = now.month;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('MONEY KYLIN'),
@@ -21,17 +17,7 @@ class TradeListScreen extends StatelessWidget {
         backgroundColor: kPrimaryColor,
         elevation: 0,
       ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            MonthlyHeader(year: year, month: month),
-            SizedBox(height: 10.0),
-            Expanded(
-              child: MonthlyTradesView(year: year, month: month),
-            ),
-          ],
-        ),
-      ),
+      body: MonthlyPage(),
       floatingActionButton: Container(
         height: 80.0,
         width: 80.0,
@@ -47,6 +33,74 @@ class TradeListScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _TradeListBottomAppBar(),
+    );
+  }
+}
+
+class MonthlyPage extends StatefulWidget {
+  @override
+  _MonthlyPageState createState() => _MonthlyPageState();
+}
+
+class _MonthlyPageState extends State<MonthlyPage> {
+  int year;
+  int month;
+
+  double delta = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    final DateTime now = DateTime.now();
+    year = now.year;
+    month = now.month;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onHorizontalDragUpdate: (details) {
+        delta += details.delta.dx;
+      },
+      onHorizontalDragEnd: (details) {
+        if (delta > 100.0) {
+          setState(() {
+            month -= 1;
+            if (month == 0) {
+              month = 12;
+              year -= 1;
+            }
+          });
+        } else if (delta < -100.0) {
+          int m = month + 1;
+          int y = year;
+          if (m == 13) {
+            m = 1;
+            y += 1;
+          }
+          final DateTime now = DateTime.now();
+          if (DateTime(y, m).isAfter(now)) {
+            delta = 0.0;
+            return;
+          }
+          setState(() {
+            month = m;
+            year = y;
+          });
+        }
+        delta = 0.0;
+      },
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            MonthlyHeader(year: year, month: month),
+            SizedBox(height: 10.0),
+            Expanded(
+              child: MonthlyTradesView(year: year, month: month),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
