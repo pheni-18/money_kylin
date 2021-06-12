@@ -135,11 +135,11 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
             ConstrainedBox(
               constraints: BoxConstraints.tightFor(width: 150, height: 60),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (type == '支出' || type == '貯蓄') {
                     amount *= -1;
                   }
-                  Provider.of<TradeData>(context)
+                  await Provider.of<TradeData>(context)
                       .addTrade(type, group, category, amount, date);
                   Navigator.pop(context);
                   Fluttertoast.showToast(

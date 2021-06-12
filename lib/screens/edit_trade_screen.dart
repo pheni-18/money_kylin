@@ -149,11 +149,11 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
             ConstrainedBox(
               constraints: BoxConstraints.tightFor(height: 60),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (type == '支出' || type == '貯蓄') {
                     amount *= -1;
                   }
-                  Provider.of<TradeData>(context).updateTrade(
+                  await Provider.of<TradeData>(context).updateTrade(
                       this.widget.trade.id,
                       type,
                       group,
@@ -204,9 +204,9 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {
+                          onPressed: () async {
                             Navigator.pop(context, 'Delete');
-                            Provider.of<TradeData>(context)
+                            await Provider.of<TradeData>(context)
                                 .deleteTrade(this.widget.trade.id);
                             Navigator.pop(context);
                             Fluttertoast.showToast(
