@@ -5,13 +5,13 @@ import 'package:money_kylin/models/trade.dart';
 import 'package:money_kylin/repositories/trade.dart';
 
 class TradeData extends ChangeNotifier {
-  final TradeRepository repository = TradeRepository();
+  final TradeRepository repository;
 
   Map<DateTime, List<Trade>> _trades = {};
 
-  TradeData() {
+  TradeData({this.repository}) {
     Future(() async {
-      List<Trade> trades = await repository.findAll();
+      List<Trade> trades = await this.repository.findAll();
       for (Trade trade in trades) {
         if (_trades[trade.date] == null) {
           _trades[trade.date] = [trade];
@@ -48,9 +48,10 @@ class TradeData extends ChangeNotifier {
     return total;
   }
 
-  void addTrade(String type, String group, String category, int amount,
+  Future<void> addTrade(String type, String group, String category, int amount,
       DateTime date) async {
-    final int id = await repository.insert(type, group, category, amount, date);
+    final int id =
+        await this.repository.insert(type, group, category, amount, date);
     final trade = Trade(id, type, group, category, amount, date);
     if (_trades[date] == null) {
       _trades[date] = [trade];
@@ -61,9 +62,9 @@ class TradeData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateTrade(int id, String type, String group, String category,
-      int amount, DateTime date) {
-    repository.update(id, type, group, category, amount, date);
+  Future<void> updateTrade(int id, String type, String group, String category,
+      int amount, DateTime date) async {
+    await this.repository.update(id, type, group, category, amount, date);
 
     Trade trade;
     bool isDateChanged = false;
@@ -89,6 +90,7 @@ class TradeData extends ChangeNotifier {
           trade.date = date;
           isDateChanged = true;
         }
+        break;
       }
     }
 
@@ -105,8 +107,8 @@ class TradeData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteTrade(int id) {
-    repository.delete(id);
+  Future<void> deleteTrade(int id) async {
+    await this.repository.delete(id);
 
     for (List<Trade> v in _trades.values) {
       v.removeWhere((x) => x.id == id);

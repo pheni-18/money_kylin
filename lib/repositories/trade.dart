@@ -63,8 +63,8 @@ class TradeRepository {
     return _toTrade(row);
   }
 
-  void update(int id, String type, String group, String category, int amount,
-      DateTime date) async {
+  Future<void> update(int id, String type, String group, String category,
+      int amount, DateTime date) async {
     final Trade oldTrade = await find(id);
     Map<String, dynamic> row = _toRow(oldTrade);
     if (type != oldTrade.type) {
@@ -87,7 +87,7 @@ class TradeRepository {
     await dbHelper.update(row);
   }
 
-  void delete(int id) async {
+  Future<void> delete(int id) async {
     await dbHelper.delete(id);
   }
 }
