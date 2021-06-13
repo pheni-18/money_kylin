@@ -10,10 +10,6 @@ import 'package:money_kylin/models/trade_data.dart';
 class TradeListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    DateTime now = DateTime.now();
-    int year = now.year;
-    int month = now.month;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('MONEY KYLIN'),
@@ -21,17 +17,7 @@ class TradeListScreen extends StatelessWidget {
         backgroundColor: kPrimaryColor,
         elevation: 0,
       ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            MonthlyHeader(year: year, month: month),
-            SizedBox(height: 10.0),
-            Expanded(
-              child: MonthlyTradesView(year: year, month: month),
-            ),
-          ],
-        ),
-      ),
+      body: MonthlyPage(),
       floatingActionButton: Container(
         height: 80.0,
         width: 80.0,
@@ -51,6 +37,74 @@ class TradeListScreen extends StatelessWidget {
   }
 }
 
+class MonthlyPage extends StatefulWidget {
+  @override
+  _MonthlyPageState createState() => _MonthlyPageState();
+}
+
+class _MonthlyPageState extends State<MonthlyPage> {
+  int year;
+  int month;
+
+  double delta = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    final DateTime now = DateTime.now();
+    year = now.year;
+    month = now.month;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onHorizontalDragUpdate: (details) {
+        delta += details.delta.dx;
+      },
+      onHorizontalDragEnd: (details) {
+        if (delta > 100.0) {
+          setState(() {
+            month -= 1;
+            if (month == 0) {
+              month = 12;
+              year -= 1;
+            }
+          });
+        } else if (delta < -100.0) {
+          int m = month + 1;
+          int y = year;
+          if (m == 13) {
+            m = 1;
+            y += 1;
+          }
+          final DateTime now = DateTime.now();
+          if (DateTime(y, m).isAfter(now)) {
+            delta = 0.0;
+            return;
+          }
+          setState(() {
+            month = m;
+            year = y;
+          });
+        }
+        delta = 0.0;
+      },
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            MonthlyHeader(year: year, month: month),
+            SizedBox(height: 10.0),
+            Expanded(
+              child: MonthlyTradesView(year: year, month: month),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class MonthlyHeader extends StatelessWidget {
   final int year;
   final int month;
@@ -59,8 +113,8 @@ class MonthlyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    DateTime date = DateTime(this.year, this.month);
+    final Size size = MediaQuery.of(context).size;
+    final DateTime date = DateTime(this.year, this.month);
 
     return Material(
       elevation: 16,
@@ -97,7 +151,7 @@ class MonthlyHeader extends StatelessWidget {
             SizedBox(height: 20.0),
             Consumer<TradeData>(
               builder: (context, tradeData, child) {
-                int monthlyAmount =
+                final int monthlyAmount =
                     tradeData.monthlyAmount(this.year, this.month);
                 return Text(
                   NumberFormat.simpleCurrency(locale: 'ja')
@@ -121,13 +175,13 @@ class MonthlyTradesView extends StatelessWidget {
   final int year;
   final int month;
 
-  MonthlyTradesView({this.year, this.month});
+  const MonthlyTradesView({this.year, this.month});
 
   List<Widget> createMonthlyWidgets() {
     List<Widget> _monthlyWidgets = [];
-    DateTime _beginningDate = DateTime(this.year, this.month, 1);
-    DateTime _now = DateTime.now();
-    DateTime _today = DateTime(_now.year, _now.month, _now.day);
+    final DateTime _beginningDate = DateTime(this.year, this.month, 1);
+    final DateTime _now = DateTime.now();
+    final DateTime _today = DateTime(_now.year, _now.month, _now.day);
     for (int i = 30; i >= 0; i--) {
       DateTime _date = DateTime(
           _beginningDate.year, _beginningDate.month, _beginningDate.day + i);
@@ -155,7 +209,7 @@ class MonthlyTradesView extends StatelessWidget {
 class DailyTradesList extends StatelessWidget {
   final DateTime _date;
 
-  DailyTradesList(this._date);
+  const DailyTradesList(this._date);
 
   @override
   Widget build(BuildContext context) {
@@ -181,11 +235,12 @@ Route _createAddRoute() {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) => AddTradeScreen(),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      var begin = Offset(0.0, 1.0);
-      var end = Offset.zero;
-      var curve = Curves.ease;
+      final Offset begin = Offset(0.0, 1.0);
+      final Offset end = Offset.zero;
+      final Curve curve = Curves.ease;
 
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      final Animatable<Offset> tween =
+          Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
       return SlideTransition(
         position: animation.drive(tween),
@@ -228,7 +283,7 @@ class DayLabel extends StatelessWidget {
       child: Text(
         '${date.day} ($week)',
         style: TextStyle(
-          color: Colors.blueGrey[500],
+          color: kSecondaryColor,
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
         ),
@@ -240,17 +295,17 @@ class DayLabel extends StatelessWidget {
 class TradeCard extends StatelessWidget {
   final Trade trade;
 
-  TradeCard({this.trade});
+  const TradeCard({this.trade});
 
   @override
   Widget build(BuildContext context) {
     Color amountColor;
     if (this.trade.type == '収入') {
-      amountColor = Colors.blue[500];
+      amountColor = Colors.blue;
     } else if (this.trade.type == '支出') {
-      amountColor = Colors.red[500];
+      amountColor = Colors.red;
     } else if (this.trade.type == '貯蓄') {
-      amountColor = Colors.teal[500];
+      amountColor = Colors.teal;
     } else {
       print('Value Error');
     }
@@ -276,7 +331,7 @@ class TradeCard extends StatelessWidget {
                   Text(
                     this.trade.category,
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: kTextColor,
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -284,7 +339,7 @@ class TradeCard extends StatelessWidget {
                   Text(
                     this.trade.group,
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: kLightTextColor,
                       fontSize: 12.0,
                       fontWeight: FontWeight.bold,
                     ),

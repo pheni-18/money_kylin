@@ -6,10 +6,10 @@ class TradeDatePicker extends StatelessWidget {
   final DateTime selectedDate;
   final Function onSelected;
 
-  TradeDatePicker({this.selectedDate, this.onSelected});
+  const TradeDatePicker({this.selectedDate, this.onSelected});
 
   Future<void> _selectDate(BuildContext context) async {
-    DateTime selected = await showDatePicker(
+    final DateTime selected = await showDatePicker(
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2019),
@@ -46,12 +46,12 @@ class TradeDatePicker extends StatelessWidget {
           Text(
             DateFormat.yMMMMd().format(selectedDate),
             style: TextStyle(
-              color: Colors.grey[700],
+              color: kTextColor,
               fontSize: 16,
             ),
           ),
           IconButton(
-            icon: Icon(Icons.date_range, color: Colors.grey[700]),
+            icon: Icon(Icons.date_range, color: kTextColor),
             onPressed: () => _selectDate(context),
           )
         ],

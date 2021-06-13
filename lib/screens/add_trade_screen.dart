@@ -17,11 +17,42 @@ class AddTradeScreen extends StatefulWidget {
 
 class _AddTradeScreenState extends State<AddTradeScreen> {
   String type = '収入';
-  String group = '変動費';
-  String category = '食料品費';
+  String group = '固定収入';
+  String category = '給料';
   int amount = 0;
   DateTime date =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
+  final Map<String, List<String>> groupChoices = {
+    '収入': [
+      '固定収入',
+    ],
+    '支出': ['固定費', '変動費'],
+    '貯蓄': [
+      '定期貯金',
+    ]
+  };
+
+  final Map<String, List<String>> categoryChoices = {
+    '固定収入': [
+      '給料',
+    ],
+    '固定費': [
+      '家賃',
+      '水道光熱費',
+      '通信費',
+    ],
+    '変動費': [
+      '食費',
+      '外食費',
+      '交通費',
+      '生活用品',
+      '雑費',
+    ],
+    '定期貯金': [
+      '現金貯金',
+    ],
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +79,22 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
               onTapIncome: () {
                 setState(() {
                   type = '収入';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
               onTapExpense: () {
                 setState(() {
                   type = '支出';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
               onTapSaving: () {
                 setState(() {
                   type = '貯蓄';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
             ),
@@ -65,14 +102,11 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
             ItemNameText('Group'),
             ItemDropdown(
               dropdownValue: group,
-              choices: <String>[
-                '固定収入',
-                '固定費',
-                '変動費',
-              ],
+              choices: groupChoices[type],
               onChanged: (String newGroup) {
                 setState(() {
                   group = newGroup;
+                  category = categoryChoices[group][0];
                 });
               },
             ),
@@ -80,13 +114,7 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
             ItemNameText('Category'),
             ItemDropdown(
               dropdownValue: category,
-              choices: <String>[
-                '家賃',
-                '生活用品費',
-                '食料品費',
-                '外食費',
-                '通信費',
-              ],
+              choices: categoryChoices[group],
               onChanged: (String newCategory) {
                 setState(() {
                   category = newCategory;
@@ -107,17 +135,17 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
             ConstrainedBox(
               constraints: BoxConstraints.tightFor(width: 150, height: 60),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (type == '支出' || type == '貯蓄') {
                     amount *= -1;
                   }
-                  Provider.of<TradeData>(context)
+                  await Provider.of<TradeData>(context)
                       .addTrade(type, group, category, amount, date);
                   Navigator.pop(context);
                   Fluttertoast.showToast(
                     msg: '🚀 A new trade created!',
                     gravity: ToastGravity.CENTER,
-                    backgroundColor: Colors.blueGrey,
+                    backgroundColor: kSecondaryColor,
                     timeInSecForIosWeb: 1,
                   );
                 },

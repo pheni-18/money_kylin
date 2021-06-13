@@ -15,7 +15,7 @@ class ItemDropdown extends StatelessWidget {
       isExpanded: true,
       elevation: 12,
       style: TextStyle(
-        color: Colors.grey[700],
+        color: kTextColor,
       ),
       underline: Container(
         height: 2.0,

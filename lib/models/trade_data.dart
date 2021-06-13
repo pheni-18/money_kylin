@@ -2,14 +2,30 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:money_kylin/models/trade.dart';
+import 'package:money_kylin/repositories/trade.dart';
 
 class TradeData extends ChangeNotifier {
-  int latestID = 0;
+  final TradeRepository repository;
 
   Map<DateTime, List<Trade>> _trades = {};
 
+  TradeData({this.repository}) {
+    Future(() async {
+      List<Trade> trades = await this.repository.findAll();
+      for (Trade trade in trades) {
+        if (_trades[trade.date] == null) {
+          _trades[trade.date] = [trade];
+        } else {
+          _trades[trade.date].add(trade);
+        }
+      }
+
+      notifyListeners();
+    });
+  }
+
   UnmodifiableListView<Trade> getTradesByDate(DateTime date) {
-    List<Trade> trades = _trades[date];
+    final List<Trade> trades = _trades[date];
     if (trades == null) {
       List<Trade> emptyList = [];
       return UnmodifiableListView(emptyList);
@@ -32,10 +48,11 @@ class TradeData extends ChangeNotifier {
     return total;
   }
 
-  void addTrade(
-      String type, String group, String category, int amount, DateTime date) {
-    latestID += 1;
-    final trade = Trade(latestID, type, group, category, amount, date);
+  Future<void> addTrade(String type, String group, String category, int amount,
+      DateTime date) async {
+    final int id =
+        await this.repository.insert(type, group, category, amount, date);
+    final trade = Trade(id, type, group, category, amount, date);
     if (_trades[date] == null) {
       _trades[date] = [trade];
     } else {
@@ -45,8 +62,10 @@ class TradeData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateTrade(int id, String type, String group, String category,
-      int amount, DateTime date) {
+  Future<void> updateTrade(int id, String type, String group, String category,
+      int amount, DateTime date) async {
+    await this.repository.update(id, type, group, category, amount, date);
+
     Trade trade;
     bool isDateChanged = false;
     DateTime oldDate;
@@ -71,6 +90,7 @@ class TradeData extends ChangeNotifier {
           trade.date = date;
           isDateChanged = true;
         }
+        break;
       }
     }
 
@@ -87,7 +107,9 @@ class TradeData extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteTrade(int id) {
+  Future<void> deleteTrade(int id) async {
+    await this.repository.delete(id);
+
     for (List<Trade> v in _trades.values) {
       v.removeWhere((x) => x.id == id);
     }

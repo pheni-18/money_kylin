@@ -7,7 +7,7 @@ class TradeTypeRow extends StatelessWidget {
   final Function onTapExpense;
   final Function onTapSaving;
 
-  TradeTypeRow(
+  const TradeTypeRow(
       {this.selectedType,
       this.onTapIncome,
       this.onTapExpense,

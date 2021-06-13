@@ -14,7 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class EditTradeScreen extends StatefulWidget {
   final Trade trade;
 
-  EditTradeScreen({this.trade});
+  const EditTradeScreen({this.trade});
 
   @override
   _EditTradeScreenState createState() => _EditTradeScreenState();
@@ -26,6 +26,37 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
   String category;
   int amount;
   DateTime date;
+
+  final Map<String, List<String>> groupChoices = {
+    '収入': [
+      '固定収入',
+    ],
+    '支出': ['固定費', '変動費'],
+    '貯蓄': [
+      '定期貯金',
+    ]
+  };
+
+  final Map<String, List<String>> categoryChoices = {
+    '固定収入': [
+      '給料',
+    ],
+    '固定費': [
+      '家賃',
+      '水道光熱費',
+      '通信費',
+    ],
+    '変動費': [
+      '食費',
+      '外食費',
+      '交通費',
+      '生活用品',
+      '雑費',
+    ],
+    '定期貯金': [
+      '現金貯金',
+    ],
+  };
 
   @override
   void initState() {
@@ -62,16 +93,22 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
               onTapIncome: () {
                 setState(() {
                   type = '収入';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
               onTapExpense: () {
                 setState(() {
                   type = '支出';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
               onTapSaving: () {
                 setState(() {
                   type = '貯蓄';
+                  group = groupChoices[type][0];
+                  category = categoryChoices[group][0];
                 });
               },
             ),
@@ -79,14 +116,11 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
             ItemNameText('Group'),
             ItemDropdown(
               dropdownValue: group,
-              choices: <String>[
-                '固定収入',
-                '固定費',
-                '変動費',
-              ],
+              choices: groupChoices[type],
               onChanged: (String newGroup) {
                 setState(() {
                   group = newGroup;
+                  category = categoryChoices[group][0];
                 });
               },
             ),
@@ -94,13 +128,7 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
             ItemNameText('Category'),
             ItemDropdown(
               dropdownValue: category,
-              choices: <String>[
-                '家賃',
-                '生活用品費',
-                '食料品費',
-                '外食費',
-                '通信費',
-              ],
+              choices: categoryChoices[group],
               onChanged: (String newCategory) {
                 setState(() {
                   category = newCategory;
@@ -121,11 +149,11 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
             ConstrainedBox(
               constraints: BoxConstraints.tightFor(height: 60),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (type == '支出' || type == '貯蓄') {
                     amount *= -1;
                   }
-                  Provider.of<TradeData>(context).updateTrade(
+                  await Provider.of<TradeData>(context).updateTrade(
                       this.widget.trade.id,
                       type,
                       group,
@@ -136,7 +164,7 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
                   Fluttertoast.showToast(
                     msg: '💫 Trade edited!',
                     gravity: ToastGravity.CENTER,
-                    backgroundColor: Colors.blueGrey,
+                    backgroundColor: kSecondaryColor,
                     timeInSecForIosWeb: 1,
                   );
                 },
@@ -152,18 +180,55 @@ class _EditTradeScreenState extends State<EditTradeScreen> {
               constraints: BoxConstraints.tightFor(height: 60),
               child: ElevatedButton(
                 onPressed: () {
-                  Provider.of<TradeData>(context)
-                      .deleteTrade(this.widget.trade.id);
-                  Navigator.pop(context);
-                  Fluttertoast.showToast(
-                    msg: '💥 Trade deleted!',
-                    gravity: ToastGravity.CENTER,
-                    backgroundColor: Colors.blueGrey,
-                    timeInSecForIosWeb: 1,
+                  showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text(
+                        'Delete',
+                        style: TextStyle(color: kSecondaryColor),
+                      ),
+                      content: const Text(
+                        'Are you sure you want to delete this trade?',
+                        style: TextStyle(
+                          color: kTextColor,
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: kLightTextColor,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.pop(context, 'Delete');
+                            await Provider.of<TradeData>(context)
+                                .deleteTrade(this.widget.trade.id);
+                            Navigator.pop(context);
+                            Fluttertoast.showToast(
+                              msg: '💥 Trade deleted!',
+                              gravity: ToastGravity.CENTER,
+                              backgroundColor: kSecondaryColor,
+                              timeInSecForIosWeb: 1,
+                            );
+                          },
+                          child: const Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: kCautionColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.red[300],
+                  primary: kCautionColor,
                   elevation: 8.0,
                 ),
                 child: Text('Delete'),
