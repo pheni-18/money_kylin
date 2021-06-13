@@ -90,6 +90,7 @@ class TradeData extends ChangeNotifier {
           trade.date = date;
           isDateChanged = true;
         }
+        break;
       }
     }
 
