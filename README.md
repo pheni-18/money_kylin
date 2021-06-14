@@ -9,3 +9,9 @@ Run flutter app
 ```
 $ flutter run
 ```
+
+## Test
+
+```
+$ flutter test
+```
