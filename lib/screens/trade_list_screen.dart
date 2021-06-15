@@ -177,7 +177,7 @@ class MonthlyTradesView extends StatelessWidget {
 
   const MonthlyTradesView({this.year, this.month});
 
-  List<Widget> createMonthlyWidgets() {
+  List<Widget> createMonthlyWidgets(TradeData tradeData) {
     List<Widget> _monthlyWidgets = [];
     final DateTime _beginningDate = DateTime(this.year, this.month, 1);
     final DateTime _now = DateTime.now();
@@ -190,42 +190,41 @@ class MonthlyTradesView extends StatelessWidget {
       }
 
       _monthlyWidgets.add(DayLabel(_date));
-      _monthlyWidgets.add(DailyTradesList(_date));
+      _monthlyWidgets.add(DailyTradesList(_date, tradeData));
     }
     return _monthlyWidgets;
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
-      child: Column(
-        children: createMonthlyWidgets(),
-      ),
-    );
+    return Consumer<TradeData>(builder: (context, tradeData, child) {
+      return SingleChildScrollView(
+        padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+        child: Column(
+          children: createMonthlyWidgets(tradeData),
+        ),
+      );
+    });
   }
 }
 
 class DailyTradesList extends StatelessWidget {
   final DateTime _date;
+  final TradeData _tradeData;
 
-  const DailyTradesList(this._date);
+  const DailyTradesList(this._date, this._tradeData);
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TradeData>(
-      builder: (context, tradeData, child) {
-        List<Trade> trades = tradeData.getTradesByDate(_date);
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            final trade = trades[index];
-            return TradeCard(trade: trade);
-          },
-          itemCount: trades.length,
-        );
+    final List<Trade> trades = this._tradeData.getTradesByDate(_date);
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        final trade = trades[index];
+        return TradeCard(trade: trade);
       },
+      itemCount: trades.length,
     );
   }
 }
