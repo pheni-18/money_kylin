@@ -1,17 +1,18 @@
-import 'dart:collection';
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:money_kylin/models/trade.dart';
 import 'package:money_kylin/repositories/trade.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class TradeData extends ChangeNotifier {
-  final TradeRepository repository;
+import 'trade_data_state.dart';
+import 'trade.dart';
 
-  Map<DateTime, List<Trade>> _trades = {};
+final tradeDataProvider = StateNotifierProvider<TradeDataController>(
+  (ref) => TradeDataController(ref.read),
+);
 
-  TradeData({this.repository}) {
-    Future(() async {
-      List<Trade> trades = await this.repository.findAll();
+class TradeDataController extends StateNotifier<TradeDataState> {
+  TradeDataController(this._read) : super(TradeDataState()) {
+    () async {
+      List<Trade> trades = await repository.findAll();
+      Map<DateTime, List<Trade>> _trades = {};
       for (Trade trade in trades) {
         if (_trades[trade.date] == null) {
           _trades[trade.date] = [trade];
@@ -19,57 +20,41 @@ class TradeData extends ChangeNotifier {
           _trades[trade.date].add(trade);
         }
       }
-
-      notifyListeners();
-    });
+      state = state.copyWith(
+        trades: _trades,
+      );
+    }();
   }
 
-  UnmodifiableListView<Trade> getTradesByDate(DateTime date) {
-    final List<Trade> trades = _trades[date];
-    if (trades == null) {
-      List<Trade> emptyList = [];
-      return UnmodifiableListView(emptyList);
-    }
-    return UnmodifiableListView(trades);
-  }
+  final Reader _read;
 
-  int monthlyAmount(int year, int month) {
-    int total = 0;
-    for (DateTime k in _trades.keys) {
-      if (k.year != year || k.month != month) {
-        continue;
-      }
-
-      List<Trade> dailyTrades = _trades[k];
-      for (Trade trade in dailyTrades) {
-        total += trade.amount;
-      }
-    }
-    return total;
-  }
+  TradeRepository get repository => _read(tradeRepositoryProvider);
 
   Future<void> addTrade(String type, String group, String category, int amount,
       DateTime date) async {
-    final int id =
-        await this.repository.insert(type, group, category, amount, date);
+    final int id = await repository.insert(type, group, category, amount, date);
     final trade = Trade(id, type, group, category, amount, date);
+    Map<DateTime, List<Trade>> _trades = {...state.trades};
     if (_trades[date] == null) {
       _trades[date] = [trade];
     } else {
       _trades[date].add(trade);
     }
 
-    notifyListeners();
+    state = state.copyWith(
+      trades: _trades,
+    );
   }
 
   Future<void> updateTrade(int id, String type, String group, String category,
       int amount, DateTime date) async {
-    await this.repository.update(id, type, group, category, amount, date);
+    await repository.update(id, type, group, category, amount, date);
 
     Trade trade;
     bool isDateChanged = false;
     DateTime oldDate;
 
+    Map<DateTime, List<Trade>> _trades = {...state.trades};
     for (List<Trade> v in _trades.values) {
       trade = v.firstWhere((x) => x.id == id, orElse: () => null);
       if (trade != null) {
@@ -104,16 +89,21 @@ class TradeData extends ChangeNotifier {
       }
     }
 
-    notifyListeners();
+    state = state.copyWith(
+      trades: _trades,
+    );
   }
 
   Future<void> deleteTrade(int id) async {
-    await this.repository.delete(id);
+    await repository.delete(id);
 
+    Map<DateTime, List<Trade>> _trades = {...state.trades};
     for (List<Trade> v in _trades.values) {
       v.removeWhere((x) => x.id == id);
     }
 
-    notifyListeners();
+    state = state.copyWith(
+      trades: _trades,
+    );
   }
 }

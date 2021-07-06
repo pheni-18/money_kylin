@@ -1,6 +1,11 @@
 import 'package:money_kylin/database_helper.dart';
 import 'package:money_kylin/models/trade.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+
+final tradeRepositoryProvider = Provider<TradeRepository>(
+  (ref) => TradeRepository(),
+);
 
 class TradeRepository {
   final DatabaseHelper dbHelper = DatabaseHelper.instance;

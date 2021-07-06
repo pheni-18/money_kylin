@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:money_kylin/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:money_kylin/models/trade.dart';
 import 'package:money_kylin/screens/add_trade_screen.dart';
 import 'package:money_kylin/screens/edit_trade_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:money_kylin/models/trade_data.dart';
+import 'package:money_kylin/models/trade_data_controller.dart';
 
 class TradeListScreen extends StatelessWidget {
   @override
@@ -105,16 +106,35 @@ class _MonthlyPageState extends State<MonthlyPage> {
   }
 }
 
-class MonthlyHeader extends StatelessWidget {
+class MonthlyHeader extends HookWidget {
   final int year;
   final int month;
 
   const MonthlyHeader({this.year, this.month});
 
+  int calcMonthlyAmount(
+      Map<DateTime, List<Trade>> trades, int year, int month) {
+    int total = 0;
+    for (DateTime k in trades.keys) {
+      if (k.year != year || k.month != month) {
+        continue;
+      }
+
+      List<Trade> dailyTrades = trades[k];
+      for (Trade trade in dailyTrades) {
+        total += trade.amount;
+      }
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     final DateTime date = DateTime(this.year, this.month);
+    final tradeDataState = useProvider(tradeDataProvider.state);
+    final monthlyAmount =
+        calcMonthlyAmount(tradeDataState.trades, this.year, this.month);
 
     return Material(
       elevation: 16,
@@ -149,20 +169,13 @@ class MonthlyHeader extends StatelessWidget {
               ],
             ),
             SizedBox(height: 20.0),
-            Consumer<TradeData>(
-              builder: (context, tradeData, child) {
-                final int monthlyAmount =
-                    tradeData.monthlyAmount(this.year, this.month);
-                return Text(
-                  NumberFormat.simpleCurrency(locale: 'ja')
-                      .format(monthlyAmount),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30.0,
-                  ),
-                );
-              },
+            Text(
+              NumberFormat.simpleCurrency(locale: 'ja').format(monthlyAmount),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 30.0,
+              ),
             ),
           ],
         ),
@@ -171,13 +184,13 @@ class MonthlyHeader extends StatelessWidget {
   }
 }
 
-class MonthlyTradesView extends StatelessWidget {
+class MonthlyTradesView extends HookWidget {
   final int year;
   final int month;
 
   const MonthlyTradesView({this.year, this.month});
 
-  List<Widget> createMonthlyWidgets(TradeData tradeData) {
+  List<Widget> createMonthlyWidgets(Map<DateTime, List<Trade>> trades) {
     List<Widget> _monthlyWidgets = [];
     final DateTime _beginningDate = DateTime(this.year, this.month, 1);
     final DateTime _now = DateTime.now();
@@ -190,33 +203,33 @@ class MonthlyTradesView extends StatelessWidget {
       }
 
       _monthlyWidgets.add(DayLabel(_date));
-      _monthlyWidgets.add(DailyTradesList(_date, tradeData));
+      _monthlyWidgets.add(DailyTradesList(_date, trades));
     }
     return _monthlyWidgets;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TradeData>(builder: (context, tradeData, child) {
-      return SingleChildScrollView(
-        padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
-        child: Column(
-          children: createMonthlyWidgets(tradeData),
-        ),
-      );
-    });
+    final tradeDataState = useProvider(tradeDataProvider.state);
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+      child: Column(
+        children: createMonthlyWidgets(tradeDataState.trades),
+      ),
+    );
   }
 }
 
 class DailyTradesList extends StatelessWidget {
   final DateTime _date;
-  final TradeData _tradeData;
+  final Map<DateTime, List<Trade>> _trades;
 
-  const DailyTradesList(this._date, this._tradeData);
+  const DailyTradesList(this._date, this._trades);
 
   @override
   Widget build(BuildContext context) {
-    final List<Trade> trades = this._tradeData.getTradesByDate(_date);
+    List<Trade> trades = this._trades[this._date];
+    trades = trades == null ? [] : trades;
     return ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),

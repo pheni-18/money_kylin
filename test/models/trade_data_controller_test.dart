@@ -1,11 +1,11 @@
-import 'dart:collection';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:money_kylin/repositories/trade.dart';
-import './trade_data_test.mocks.dart';
-import 'package:money_kylin/models/trade_data.dart';
+import 'trade_data_controller_test.mocks.dart';
+import 'package:money_kylin/models/trade_data_controller.dart';
 import 'package:money_kylin/models/trade.dart';
 
 @GenerateMocks([TradeRepository])
@@ -19,39 +19,23 @@ void main() {
     ];
   });
 
-  group('getTradesByDate', () {
-    final TradeData tradeData = TradeData(repository: repository);
-    test('trades exist', () {
-      final DateTime date = DateTime(2021, 1, 1);
-      var result = tradeData.getTradesByDate(date);
-      expect(result, isA<UnmodifiableListView<Trade>>());
-      expect(result, isNotEmpty);
-    });
-
-    test('no trade exist', () {
-      final TradeData tradeData = TradeData(repository: repository);
-      final DateTime date = DateTime(2021, 1, 4);
-      var result = tradeData.getTradesByDate(date);
-      expect(result, isA<UnmodifiableListView<Trade>>());
-      expect(result, isEmpty);
-    });
-  });
-
-  group('monthlyAmount', () {
-    final TradeData tradeData = TradeData(repository: repository);
-    test('trades exist', () {
-      var result = tradeData.monthlyAmount(2021, 1);
-      expect(result, 6000);
-    });
-
-    test('no trade exist', () {
-      var result = tradeData.monthlyAmount(2021, 2);
-      expect(result, 0);
-    });
+  TradeDataController target;
+  setUp(() async {
+    final container = ProviderContainer(
+      overrides: [
+        tradeRepositoryProvider.overrideWithProvider(
+          Provider((ref) => repository),
+        ),
+      ],
+    );
+    target = container.read(tradeDataProvider);
+    await expectLater(
+      target.stream.map((s) => s.trades).first,
+      completion(isNotEmpty),
+    );
   });
 
   group('addTrade', () {
-    final TradeData tradeData = TradeData(repository: repository);
     final String type = 'type4';
     final String group = 'group4';
     final String category = 'category4';
@@ -63,9 +47,13 @@ void main() {
           .thenAnswer((_) async {
         return 4;
       });
-      await tradeData.addTrade(type, group, category, amount, date);
-      var result = tradeData.getTradesByDate(date);
-      expect(result.length, 2);
+
+      var dailyTrades = target.debugState.trades[date];
+      expect(dailyTrades.length, 1);
+
+      await target.addTrade(type, group, category, amount, date);
+      dailyTrades = target.debugState.trades[date];
+      expect(dailyTrades.length, 2);
     });
 
     test('no trade exist for the day', () async {
@@ -74,14 +62,17 @@ void main() {
           .thenAnswer((_) async {
         return 4;
       });
-      await tradeData.addTrade(type, group, category, amount, date);
-      var result = tradeData.getTradesByDate(date);
-      expect(result.length, 1);
+
+      var dailyTrades = target.debugState.trades[date];
+      expect(dailyTrades, isNull);
+
+      await target.addTrade(type, group, category, amount, date);
+      dailyTrades = target.debugState.trades[date];
+      expect(dailyTrades.length, 1);
     });
   });
 
   group('updateTrade', () {
-    TradeData tradeData = TradeData(repository: repository);
     final int id = 1;
     final String type = 'type12';
     final String group = 'group12';
@@ -91,11 +82,12 @@ void main() {
       final DateTime date = DateTime(2021, 1, 1);
       when(repository.update(id, type, group, category, amount, date))
           .thenAnswer((_) async {});
-      await tradeData.updateTrade(id, type, group, category, amount, date);
-      var result = tradeData.getTradesByDate(date);
-      expect(result.length, 1);
 
-      Trade trade = result[0];
+      await target.updateTrade(id, type, group, category, amount, date);
+      var dailyTrades = target.debugState.trades[date];
+      expect(dailyTrades.length, 1);
+
+      Trade trade = dailyTrades[0];
       expect(trade.id, id);
       expect(trade.type, type);
       expect(trade.group, group);
@@ -108,11 +100,11 @@ void main() {
       final DateTime date = DateTime(2021, 1, 4);
       when(repository.update(id, type, group, category, amount, date))
           .thenAnswer((_) async {});
-      await tradeData.updateTrade(id, type, group, category, amount, date);
-      var result = tradeData.getTradesByDate(date);
-      expect(result.length, 1);
+      await target.updateTrade(id, type, group, category, amount, date);
+      var dailyTrades = target.debugState.trades[date];
+      expect(dailyTrades.length, 1);
 
-      Trade trade = result[0];
+      Trade trade = dailyTrades[0];
       expect(trade.id, id);
       expect(trade.type, type);
       expect(trade.group, group);
@@ -121,19 +113,18 @@ void main() {
       expect(trade.date, date);
 
       final DateTime oldDate = DateTime(2021, 1, 1);
-      result = tradeData.getTradesByDate(oldDate);
-      expect(result, isEmpty);
+      dailyTrades = target.debugState.trades[oldDate];
+      expect(dailyTrades, isEmpty);
     });
   });
 
   group('deleteTrade', () {
     when(repository.delete(1)).thenAnswer((_) async {});
-    final TradeData tradeData = TradeData(repository: repository);
     test('trades exist', () async {
-      await tradeData.deleteTrade(1);
+      await target.deleteTrade(1);
       final DateTime date = DateTime(2021, 1, 1);
-      var result = tradeData.getTradesByDate(date);
-      expect(result, isEmpty);
+      var dailyTrades = target.debugState.trades[date];
+      expect(dailyTrades, isEmpty);
     });
   });
 }

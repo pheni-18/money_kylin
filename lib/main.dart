@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:money_kylin/screens/trade_list_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:money_kylin/models/trade_data.dart';
-import 'package:money_kylin/repositories/trade.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(
+      const ProviderScope(
+        child: MyApp(),
+      ),
+    );
 
 class MyApp extends StatelessWidget {
-  final TradeRepository repository = TradeRepository();
+  const MyApp({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => TradeData(repository: repository),
-      child: MaterialApp(
-        home: TradeListScreen(),
-      ),
+    return MaterialApp(
+      home: TradeListScreen(),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:money_kylin/components/trade_type.dart';
 import 'package:money_kylin/components/item_dropdown.dart';
 import 'package:money_kylin/components/item_name_text.dart';
@@ -6,8 +7,7 @@ import 'package:money_kylin/components/amount_text_field.dart';
 import 'package:money_kylin/components/trade_date_picker.dart';
 import 'package:money_kylin/components/trade_app_bar.dart';
 import 'package:money_kylin/constants.dart';
-import 'package:provider/provider.dart';
-import 'package:money_kylin/models/trade_data.dart';
+import 'package:money_kylin/models/trade_data_controller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class AddTradeScreen extends StatefulWidget {
@@ -139,7 +139,8 @@ class _AddTradeScreenState extends State<AddTradeScreen> {
                   if (type == '支出' || type == '貯蓄') {
                     amount *= -1;
                   }
-                  await Provider.of<TradeData>(context)
+                  await context
+                      .read(tradeDataProvider)
                       .addTrade(type, group, category, amount, date);
                   Navigator.pop(context);
                   Fluttertoast.showToast(
